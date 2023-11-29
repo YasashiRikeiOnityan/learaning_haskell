@@ -7,3 +7,7 @@ Haskellを学ぶ中で作成したプログラムファイルを管理します�
 - すごいHaskellたのしく学ぼう！
 - Haskell入門
 - Real World Haskell
+
+### 学習に用いるサイト
+
+- AtCoder
