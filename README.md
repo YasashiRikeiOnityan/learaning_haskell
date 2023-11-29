@@ -15,3 +15,7 @@ Haskellを学ぶ中で作成したプログラムファイルを管理します�
 
 - AtCoder
     -> atcoder
+    - Beginners Selection
+    -> beginners_selection
+    - 競技プログラミングの鉄則
+    -> competitive_programming_rules
