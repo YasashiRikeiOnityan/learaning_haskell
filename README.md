@@ -1,6 +1,6 @@
 # learaning_haskell
 
-Haskellを学ぶ中で作成したプログラムファイルを管理します。
+Haskellを学ぶ中で作成したプログラムファイルを管理します。プロHaskellerになりたい！
 
 ### 学習に用いる本
 
