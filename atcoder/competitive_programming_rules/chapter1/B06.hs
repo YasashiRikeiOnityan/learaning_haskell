@@ -24,7 +24,7 @@ main = do
 
   let s = cumSum n $ map f as
 
-  q <- readLn @Int
+  q <- readLn :: IO Int
   replicateM_ q $ do
     [l, r] <- getInts
 
