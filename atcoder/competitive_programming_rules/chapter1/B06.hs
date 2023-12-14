@@ -1,5 +1,4 @@
 {-# LANGUAGE MultiWayIf #-}
-{-# LANGUAGE TypeApplications #-}
 
 import Control.Monad (replicateM_)
 import Data.Array.Unboxed (UArray, listArray, (!))
@@ -30,10 +29,7 @@ main = do
 
     putStrLn $
       let result = s ! succ r - s ! l
-       in if
-              | result > 0 -> "win"
-              | result == 0 -> "draw"
-              | otherwise -> "lose"
+      in if result > 0 then "win" else if result == 0 then "draw" else "lose"
 
 
 {-
