@@ -3,4 +3,5 @@ main = do
     [n, k] <- map read . words <$> getLine :: IO [Int]
     ps <- map read . words <$> getLine :: IO[Int]
     qs <- map read . words <$> getLine :: IO [Int]
-    if any (\m -> elem k $ map (+ m) qs) ps then putStrLn "Yes" else putStrLn "No"
+    putStrLn $ if k `elem` ((+) <$> ps <*> qs) then "Yes" else "No"
+    --putStrLn $ if k `elem` [p + q | p <- ps, q <- qs] then "Yes" else "No"

@@ -1,7 +1,5 @@
-import Control.Applicative
-
 main :: IO ()
 main = do
-    [a, b] <- map read . words <$> getLine
+    [a, b] <- map read . words <$> getLine :: IO [Int]
     let x = [a..b]
-    if elem 0 $ map (\m -> 100 `mod` m) x then putStrLn "Yes" else putStrLn "No"
+    putStrLn $ if 0 `elem` map (100 `mod`) x then "Yes" else "No"

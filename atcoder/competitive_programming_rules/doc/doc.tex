@@ -1,0 +1,368 @@
+\documentclass[12pt,a4paper,dvipdfmx,fleqn]{article}%[a4paper,12pt,dvipdfmx,fleqn]{jarticle}
+\setlength{\columnseprule}{0.4pt}
+\setlength{\columnsep}{4zw} 
+\setlength{\columnwidth}{5mm}
+\usepackage[dvipdfmx]{graphicx,color}
+\usepackage[top=25mm,bottom=25mm,left=20mm,right=20mm]{geometry}
+\usepackage{amsmath,amsthm,amssymb,esvect,amsfonts,fancybox,tikz,tikz-3dplot,ulem,fancyhdr}
+\usepackage{./sty/eclbkbox,./sty/okumacro,./sty/ascolorbox}
+\usetikzlibrary{patterns,intersections,calc,quotes,angles,arrows.meta,positioning,graphs,through}
+\tcbuselibrary{raster,skins,theorems,breakable}
+\allowdisplaybreaks
+\usepackage[dvipdfmx]{hyperref}
+\usepackage{pxjahyper}
+\hypersetup{% hyperrefオプションリスト
+    setpagesize=false,
+    bookmarksnumbered=true,%
+    bookmarksopen=true,%
+    colorlinks=true,%
+    linkcolor=blue,
+    citecolor=red,
+}
+\usepackage[absolute,overlay]{textpos}
+\usepackage{ceo}
+\usepackage{epic,eepic,emath,emathW,emathB,emathBk,emathMw,emathCap,emathE}
+% =,→ 間の余白
+\thickmuskip=1.0\thickmuskip
+% +,- 間の余白
+\medmuskip=0.8\medmuskip
+% … などの装飾記号の余白
+\thinmuskip=0.8\thinmuskip
+% 行列を詰める
+\arraycolsep=0.3\arraycolsep
+% 数式の上下のスペースの変更
+\AtBeginDocument{
+    \abovedisplayskip     =0.5\abovedisplayskip
+    \abovedisplayshortskip=0.5\abovedisplayshortskip
+    \belowdisplayskip     =0.5\belowdisplayskip
+    \belowdisplayshortskip=0.5\belowdisplayshortskip}
+\usepackage{listings}
+\lstset{
+  basicstyle={\ttfamily},
+  identifierstyle={\small},
+  commentstyle={\smallitshape},
+  keywordstyle={\small\bfseries},
+  ndkeywordstyle={\small},
+  stringstyle={\small\ttfamily},
+  frame={tb},
+  breaklines=true,
+  columns=[l]{fullflexible},
+  numbers=left,
+  xrightmargin=0zw,
+  xleftmargin=3zw,
+  numberstyle={\scriptsize},
+  stepnumber=1,
+  numbersep=1zw,
+  lineskip=-0.5ex
+}
+\pagestyle{fancy}
+\lhead{競技プログラミングの鉄則　アルゴリズム力と思考力を高める77の技術}
+\chead{}
+\rhead{\thepage}
+\cfoot{}
+\theoremstyle{definition}
+\newtheorem*{toi*}{問題}
+\theoremstyle{definition}
+\newtheorem*{ans*}{解説}
+\theoremstyle{definition}
+\newtheorem*{proof*}{証明}
+\newcommand{\toukou}[2]{\begin{ascolorbox19}{第#1問}#2\end{ascolorbox19}}
+\newcommand{\mybox}[1]{\,\raisebox{-.8ex}{\framebox(1.5em,1.5em)[c]{$#1$}}\,} %文字囲い
+\newcommand{\ttt}[1]{\texttt{#1}} %文字囲い
+\title{競技プログラミングの鉄則\thanks{\url{https://atcoder.jp/contests/tessoku-book}}}
+\author{やさしい理系お兄ちゃん}
+\date{\today}
+\begin{document}
+\begin{textblock*}{.5\textwidth}(5mm,20mm)
+    \includegraphics[width=4cm]{logo.jpg}
+\end{textblock*}
+\maketitle
+\tableofcontents
+\clearpage
+\setcounter{section}{-1}
+\section{はじめに}\label{はじめに}
+このPDFは関数型言語Haskellの習得のために、「競技プログラミングの鉄則」の問題に対してHaskellで記述したコード例をまとめた資料です。
+私のプログラミング力の向上を主目的とし、Haskellを学びたい人への手助けとなると良いと考えています。HaskellのI/O\footnote{I/O : Input(標準入力), Output(標準出力)}は一筋縄でいかないので、アルゴリズム
+以前の問題で苦戦してしまうかもしれないでしょう。ですが、入出力に時間を取られるのは勿体無いため、そのような面でもHaskell習得の支えになれば良いと願います。
+\section{アルゴリズムと計算量}\label{アルゴリズムと計算量}
+\subsection{導入問題}\label{導入問題}
+\begin{toi*}
+    整数$N$が与えられるので、一辺の長さが$N$であるような正方形の面積を出力するプログラムを作成してください。
+\end{toi*}
+\begin{lstlisting}[caption=A01.hs,label=A01]
+main :: IO ()
+main = do
+    n <- readLn :: IO Int
+    putStrLn $ show (n * n)
+\end{lstlisting}
+\begin{ans*}
+    \ttt{readLn}の型は\ttt{Read a => IO a}です。ここで、\ttt{:: IO Int}と後ろに記述することで型変数\ttt{a}は\ttt{Int}型であると宣言することができます。
+    もちろん、書かなくても\ttt{(*)}という演算が後ろで行われていることから、型クラス\ttt{Num}に属することを推論してくれます。
+    （書いた方が見やすいのではないでしょうか？）\ttt{n <- readLn :: IO Int}を実行すると、\ttt{n}は通常の整数値になります。
+    \ttt{show}の型は\ttt{Show a => a -> String}であるから、\ttt{n * n}の結果を\ttt{show}に渡すことで、整数値を文字列に変換することができます。
+    最後に\ttt{String -> IO ()}という型をもつ\ttt{putStrLn}に渡せば完了です。
+\end{ans*}
+\begin{toi*}
+    整数$A$と$B$が与えられるので、$A+B$の値を出力するプログラムを作成してください。ただし、制約は$1\ll A\ll 100$、$1\ll B\ll 100$であるとします。
+\end{toi*}
+\begin{lstlisting}[caption=B01.hs,label=B01]
+main :: IO ()
+main = do
+    [a, b] <- map read . words <$> getLine
+    putStrLn $ show (a + b)
+\end{lstlisting}
+\begin{ans*}
+    まずは2つの空白区切りの整数の入力から説明します。\ttt{<\$>}について、定義は以下の通りです。
+    \begin{verbatim}
+    (<$>) :: (Functor f) => (a -> b) -> f a -> f b
+    f <$> x = fmap f x
+    \end{verbatim}
+    \vspace*{-4mm}
+    \ttt{<\$>}の型に注目して下さい。\ttt{IO}は\ttt{Functor}のインスタンスであるから、\ttt{f}を\ttt{IO}に置き換えると、
+    \ttt{<\$> :: (a -> b) -> IO a -> IO b}となります。
+    また、
+    \begin{itemize}
+        \item [] \ttt{getLine :: IO String}
+        \item [] \ttt{map read . words :: Read b => String -> [b]}
+    \end{itemize}
+    と定義されています。以上を合わせると
+    \begin{verbatim}
+    map read . words <$> getLine :: (Read b) => IO [b]
+    \end{verbatim}
+    \vspace*{-4mm}
+    となることが分かります。\ttt{IO [b]}については、コンパイラが勝手に\ttt{IO [Int]}としてくれます。\footnote{Type Defaultingというものが使われています。詳しくはいつか書きます。(\today)}
+    当然、\ttt{:: IO {Int}}と型を指定するのもいいことでしょう。最終的に、結果を\ttt{Int}型のリストとして\ttt{[a, b]}に束縛することができます。（\chub 入力が2つであると分かっているので、\ttt{[a, b]}としています。）
+    あとは計算結果をA01と同様に出力すれば完了です。
+\end{ans*}
+\subsection{全探索1}\label{全探索1}
+\begin{toi*}
+    $N$個の整数$A_1,\,A_2,\,\udots,\,A_N$の中に、整数$X$が含まれるかどうかを判定するプログラムを作成してください。
+\end{toi*}
+\begin{lstlisting}[caption=A02.hs,label=A02]
+main :: IO ()
+main = do
+    [n, x] <- map read . words <$> getLine :: IO [Int]
+    as <- map read . words <$> getLine :: IO [Int]
+    putStrLn $ if x `elem` as then "Yes" else "No"
+\end{lstlisting}
+\begin{ans*}
+    3, 4行目に関してはListing~\ref{B01}の解説で紹介しました。そろそろ気付いたかもしれませんが、Haskellでは\texttt{for}を使った繰り返し処理を
+    行わないので、リストの長さを示す\texttt{n}を受け取る必要がないことが多いです。そのため、3行目は
+    \begin{verbatim}
+    [_, x] <- map read . words <$> getLine
+    \end{verbatim}
+    \vspace*{-4mm}
+    としても良いです。そして、リスト\texttt{as}の中に\texttt{x}が含まれているかは、関数\texttt{elem}で判定することができます。
+    関数\texttt{elem}は中置記法を用いることが多いです。
+\end{ans*}
+\begin{toi*}
+    $A$以上$B$以下の整数のうち、100の約数であるものは存在しますか。答えをYesかNoで出力するプログラムを作成してください。
+\end{toi*}
+\begin{lstlisting}[caption=B02.hs,label=B02]
+main :: IO ()
+main = do
+    [a, b] <- map read . words <$> getLine :: IO [Int]
+    let x = [a..b]
+    putStrLn $ if 0 `elem` map (100 `mod`) x then "Yes" else "No"
+\end{lstlisting}
+\begin{ans*}
+    4行目の\texttt{[a..b]}は、\texttt{[a, a+1, a+2, ..., b-1, b]}を表します。
+    このリストのすべての要素について、100から割った余りを考えます。その余りのリストの中に\texttt{0}が含まれてるか否かを判定します。
+\end{ans*}
+\subsection{全探索2}\label{全探索2}
+\begin{toi*}
+    赤いカードが$N$枚あり、それぞれ整数$P_1,\,P_2,\,\udots,\,P_N$が書かれています。また、青いカードが$N$枚あり、それぞれ整数$Q_1,\,Q_2,\,\udots,\,Q_N$が書かれています。
+    太郎くんは、赤いカードの中から1枚、青いカードの中から1枚、合計2枚のカードを選びます。選んだ2枚のカードに書かれた整数の合計が$K$となるようにする方法は存在しますか。答えを出力するプログラムを書いてください。
+\end{toi*}
+\begin{lstlisting}[caption=A03.hs,label=A03]
+main :: IO ()
+main = do
+    [_, k] <- map read . words <$> getLine :: IO [Int]
+    ps <- map read . words <$> getLine :: IO [Int]
+    qs <- map read . words <$> getLine :: IO [Int]
+    putStrLn $ if k `elem` [p + q | p <- ps, q <- qs] then "Yes" else "No"
+\end{lstlisting}
+\begin{ans*}
+    6行目の
+    \begin{verbatim}
+    [p + q | p <- ps, q <- qs]
+    \end{verbatim}
+    \vspace*{-4mm}
+    では、リスト\texttt{ps}とリスト\texttt{qs}から一つずつ要素を取り出し、それらを足し合わせて可能性のある答えをすべて計算して提示しています。
+    これを{\bf 非決定性計算}とみなすことができます。このとき、
+    \begin{verbatim}
+    (+) <$> ps <*> qs
+    \end{verbatim}
+    \vspace*{-4mm}
+    と書くことができます。これについては{\bf アプリカティブ}という用語を聞くまでは保留で構いません。非決定性計算という言葉も同様です。
+    （いずれ、後者の記法の方がきれいだと感じる日が来るはずです！私はまだ来ていませんが。）
+\end{ans*}
+\begin{toi*}
+    $N$個の商品があり、商品$i~(1\ll i\ll N)$の価格は$A_i$円です。異なる3つの商品を選び、合計価格をピッタリ1000円
+    にする方法は存在しますか。答えをYesかNoで出力するプログラムを作成してください。ただし、制約は$3\ll N\ll 1000$であるとします。
+\end{toi*}
+\begin{lstlisting}[caption=B03.hs,label=B03]
+import Control.Applicative
+
+justNum :: Int -> [Int] -> Bool
+justNum t (x : xs) = if elem True (map (\m -> m + x == t) (xs)) then True else justNum t (xs)
+justNum _ _ = False
+
+justThousand :: [Int] -> Bool
+justThousand (x : xs) = if justNum (1000 - x) xs then True else justThousand xs
+justThousand _ = False
+
+main :: IO ()
+main = do
+    n <- read <$> getLine :: IO Int
+    as <- map read . words <$> getLine :: IO [Int]
+    putStrLn if justThousand as then "Yes" else "No"
+\end{lstlisting}
+\subsection{2進法}\label{2進法}
+\begin{toi*}
+    整数$N$が10進法表記で与えられます。$N$を2進法に変換した値を出力するプログラムを作成してください。
+\end{toi*}
+\begin{lstlisting}[caption=A04.hs,label=A04]
+toBinary :: Int -> [Int] -> [Int]
+toBinary 0 x = x
+toBinary t x = toBinary (div t 2) ([mod t 2] ++ x)
+
+makeZero :: Int -> String
+makeZero 0 = ""
+makeZero x = "0" ++ makeZero (x - 1)
+
+binary2str :: [Int] -> String
+binary2str [] = ""
+binary2str (x : xs) = show x ++ binary2str xs
+
+main :: IO ()
+main = do
+    n <- readLn
+    let ns = toBinary n []
+    putStrLn $ (makeZero $ 10 - (length ns)) ++ (binary2str ns)
+\end{lstlisting}
+\begin{toi*}
+    整数$N$~(8桁以内)が2進法表記で与えられます。$N$を10進法に変換した値を出力するプログラムを作成してください。
+\end{toi*}
+\begin{lstlisting}[caption=B04.hs,label=B04]
+int2list :: Int -> [Int] -> [Int]
+int2list 0 t = t
+int2list x t = int2list (div x 10) ([mod x 10] ++ t)
+
+list2int :: [Int] -> Int
+list2int [] = 0
+list2int (x : xs) = x * (2 ^ length xs) + list2int xs
+
+main :: IO ()
+main = do
+    x <- readLn
+    putStrLn $ show $ list2int $ int2list x []
+\end{lstlisting}
+\subsection{チャレンジ問題}\label{チャレンジ問題1}
+\begin{toi*}
+    赤・青・白の3枚のカードがあります。太郎くんは、それぞれのカードに1以上$N$以下の整数を書かなければなりません。
+    3枚のカードの合計を$K$にするような書き方は何通りありますか。
+\end{toi*}
+\begin{lstlisting}[caption=A05.hs,label=A05]
+import Control.Applicative
+
+third :: (Int, Int, Int) -> Int
+third (_, _, c) = c
+
+main :: IO ()
+main = do
+    [n, k] <- map read . words <$> getLine
+    putStrLn $ show $ length [(a, b, c) | a <- [1..n], b <- [1..n], let c = k - a - b, 1 <= c, c <= n]
+\end{lstlisting}
+\section{累積和}\label{累積和}
+\subsection{一次元の累積和}\label{一次元の累積和}
+\begin{toi*}
+    ある遊園地では$N$日間にわたるイベントが開催され、$i$日目には$A_i$人が来場しました。
+    以下の$Q$個の質問に答えるプログラムを作成してください。
+    \begin{itemize}
+        \item [] 質問1：$L_1$日目から$R_1$までの来場者数は？\\[2mm]
+        \hspace{2em}{\vdots}
+        \item [] 質問$Q$：$L_Q$日目から$R_Q$までの来場者数は？
+    \end{itemize}
+\end{toi*}
+\begin{lstlisting}[caption=A06.hs,label=A06]
+import Control.Applicative
+import Control.Monad
+
+cumulative_sum :: [Int] -> [Int]
+cumulative_sum [] = []
+cumulative_sum [x] = [x]
+cumulative_sum (x : xs) = [x] ++ (cumulative_sum $ [x + head xs] ++ tail xs)
+
+calc :: [Int] -> [Int] -> Int
+calc s [l, r] = if l == 1 then s !! r else (s !! (r - 1)) - (s !! (l - 2))
+
+make_output :: [Int] -> String
+make_output [x] = show x
+make_output (x : xs) = show x ++ "\n" ++ make_output xs
+
+main :: IO ()
+main = do
+    [n, q] <- map read . words <$> getLine
+    as <- map read . words <$> getLine :: IO [Int]
+    lr <- replicateM q getLine
+    let x = map words lr
+    let y = map (\m -> map read m :: [Int]) x
+    putStrLn $ make_output $ map (calc (cumulative_sum as)) y
+\end{lstlisting}
+\begin{toi*}
+    太郎君はくじを$N$回引き、$i$回目の結果は$A_i$でした。$A_i=1$のときアタリ、$A_i=0$のときハズレを意味します。
+    「$L$回目から$R$回目までの中では、アタリとハズレどちらが多いか？」という形式の質問が$Q$個与えられるので、
+    それぞれの質問に答えるプログラムを作成してください。計算量は$O(N+Q)$であることが望ましいです。
+\end{toi*}
+\begin{lstlisting}[caption=B06.hs,label=B06]
+import Control.Monad ( replicateM )
+
+cumulativeSum :: Int -> [Int] -> [Int] -> [Int]
+cumulativeSum t i [] = if length i > 1 then tail i else []
+cumulativeSum t i [x] = if t == x then tail $ i ++ [1 + last i] else tail $ i ++ [last i]
+cumulativeSum t i (x : xs) = if t == x then cumulativeSum t (i ++ [1 + last i]) xs else cumulativeSum t (i ++ [last i]) xs
+    
+cumulativeSumOne :: [Int] -> [Int]
+cumulativeSumOne [] = []
+cumulativeSumOne (x : xs) = scanl (+) x xs
+
+cumulativeSumZero :: [Int] -> [Int]
+cumulativeSumZero [] = []
+cumulativeSumZero x = cumulativeSumOne $ map (\m -> if m == 0 then 1 else 0) x
+
+calc :: [Int] -> [Int] -> Int
+calc s [l, r] = if l == 1 then s !! (r - 1) else (s !! (r - 1)) - (s !! (l - 2))
+
+minus :: [Int] -> [Int] -> [Int]
+minus [] [y] = [-y]
+minus [x] [] = [x]
+minus [x] [y] = [x - y]
+minus (x : xs) (y : ys) =(x - y) : minus xs ys
+
+makeOutput :: [Int] -> String
+makeOutput x = unlines $ map (\x -> if x > 0 then "win" else if x == 0 then "draw" else "lose") x
+
+main :: IO ()
+main = do
+    n <- readLn :: IO Int
+    as <- map read . words <$> getLine :: IO [Int]
+    q <- readLn :: IO Int
+    lr <- replicateM q getLine :: IO [String]
+    let x = map words lr :: [[String]]
+    let y = map (\m -> map read m :: [Int]) x :: [[Int]]
+    let win = cumulativeSumOne as :: [Int]
+    let lose = cumulativeSumZero as :: [Int]
+    putStrLn $ makeOutput (minus (map (calc win) y) (map (calc lose) y)) :: IO ()
+\end{lstlisting}
+\begin{ans*}
+    実行時間超過です。累積和を計算する関数\ttt{cumulativeSumZero}のオーダーに問題があります。プログラムとしては正しい出力が得られます。
+    この関数は$O(N^2)$であり、$0\ll N\ll 10^5$から、最悪計算量が$10^{10}$となってしまうため制限時間超過となります。問題文では、
+    $O(N+Q)$であることが望ましいと書かれていますので、それを目標にプログラムを変更しましょう。
+\end{ans*}
+%\emovalbox{AC}
+\begin{toi*}
+    ある会社ではD日間にわたってイベントが開催され、N人が出席します。参加者$i$は$L_i$日目から$R_i$日目まで出席する予定です。
+    各日の出席者数を出力するプログラムを作ってください。
+\end{toi*}
+\end{document}

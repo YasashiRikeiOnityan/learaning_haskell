@@ -1,5 +1,3 @@
-import Control.Applicative
-
 justNum :: Int -> [Int] -> Bool
 justNum t (x : xs) = any (\m -> m + x == t) xs || justNum t xs
 justNum _ _ = False
