@@ -296,7 +296,14 @@ main = do
     \end{verbatim}
     \vspace*{-4mm}
     という流れで計算しています。入力を\texttt{Int}として受け取り、それをリスト構造に変換しているなら、
-    最初からリスト構造である\texttt{String}で受け取るべきですね。
+    最初からリスト構造である\texttt{String}で受け取るべきですね。\par
+    おっと、関数\texttt{print}が初登場しました。型は以下のようになっています。
+    \texttt{putStrLn}との違いを見てみましょう。
+    \begin{verbatim}
+    print :: Show a => a -> IO ()
+    putStrLn :: String -> IO ()
+    \end{verbatim}
+    \vspace*{-4mm}
 \end{ans*}
 \subsection{チャレンジ問題}\label{チャレンジ問題1}
 \begin{toi*}
@@ -309,6 +316,10 @@ main = do
     [n, k] <- map read . words <$> getLine :: IO [Int]
     print $ length [(a, b, c) | a <- [1..n], b <- [1..n], let c = k - a - b, 1 <= c, c <= n]
 \end{lstlisting}
+\begin{ans*}
+    リスト内包表記のおかげで解説いらず！\texttt{1}以上\texttt{n}以下の範囲で、\texttt{a + b + c = k}となるように\texttt{c}を定めてあげます。
+    出来上がったトリプルのリストの長さが答えになります。
+\end{ans*}
 \section{累積和}\label{累積和}
 \subsection{一次元の累積和}\label{一次元の累積和}
 \begin{toi*}
@@ -321,29 +332,28 @@ main = do
     \end{itemize}
 \end{toi*}
 \begin{lstlisting}[caption=A06.hs,label=A06]
-import Control.Applicative
-import Control.Monad
+import Control.Monad ( replicateM )
 
-cumulative_sum :: [Int] -> [Int]
-cumulative_sum [] = []
-cumulative_sum [x] = [x]
-cumulative_sum (x : xs) = [x] ++ (cumulative_sum $ [x + head xs] ++ tail xs)
+cumulativeSum :: [Int] -> [Int]
+cumulativeSum [] = []
+cumulativeSum [x] = [x]
+cumulativeSum (x : xs) = x : cumulativeSum ((x + head xs) : tail xs)
 
 calc :: [Int] -> [Int] -> Int
 calc s [l, r] = if l == 1 then s !! r else (s !! (r - 1)) - (s !! (l - 2))
 
-make_output :: [Int] -> String
-make_output [x] = show x
-make_output (x : xs) = show x ++ "\n" ++ make_output xs
+makeOutput :: [Int] -> String
+makeOutput [x] = show x
+makeOutput (x : xs) = show x ++ "\n" ++ makeOutput xs
 
 main :: IO ()
 main = do
-    [n, q] <- map read . words <$> getLine
+    [_, q] <- map read . words <$> getLine :: IO [Int]
     as <- map read . words <$> getLine :: IO [Int]
-    lr <- replicateM q getLine
+    lr <- replicateM q getLine :: IO [String]
     let x = map words lr
     let y = map (\m -> map read m :: [Int]) x
-    putStrLn $ make_output $ map (calc (cumulative_sum as)) y
+    putStrLn $ makeOutput $ map (calc (cumulativeSum as)) y
 \end{lstlisting}
 \begin{toi*}
     太郎君はくじを$N$回引き、$i$回目の結果は$A_i$でした。$A_i=1$のときアタリ、$A_i=0$のときハズレを意味します。

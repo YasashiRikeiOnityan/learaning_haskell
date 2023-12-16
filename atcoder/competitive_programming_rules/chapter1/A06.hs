@@ -1,15 +1,13 @@
 import Control.Monad ( replicateM )
 
 cumulativeSum :: [Int] -> [Int]
-cumulativeSum [] = []
-cumulativeSum [x] = [x]
-cumulativeSum (x : xs) = x : cumulativeSum ((x + head xs) : tail xs)
+cumulativeSum = scanl (+) 0
 
 calc :: [Int] -> [Int] -> Int
-calc s [l, r] = if l == 1 then s !! r else (s !! (r - 1)) - (s !! (l - 2))
+calc s [l, r] = (s !! r) - (s !! (l - 1))
 
 makeOutput :: [Int] -> String
-makeOutput [x] = show x
+makeOutput [] = ""
 makeOutput (x : xs) = show x ++ "\n" ++ makeOutput xs
 
 main :: IO ()
@@ -17,6 +15,6 @@ main = do
     [_, q] <- map read . words <$> getLine :: IO [Int]
     as <- map read . words <$> getLine :: IO [Int]
     lr <- replicateM q getLine :: IO [String]
-    let x = map words lr
-    let y = map (\m -> map read m :: [Int]) x
-    putStrLn $ makeOutput $ map (calc (cumulativeSum as)) y
+    let lr_ = map words lr
+    let lrs = map (\m -> map read m :: [Int]) lr_
+    putStrLn $ makeOutput $ map (calc (cumulativeSum as)) lrs
