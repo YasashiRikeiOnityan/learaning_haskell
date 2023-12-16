@@ -1,17 +1,13 @@
-toBinary :: Int -> [Int] -> [Int]
-toBinary 0 x = x
-toBinary t x = toBinary (div t 2) ([mod t 2] ++ x)
+toBinary :: Int -> String
+toBinary 1 = "1"
+toBinary n = toBinary (n `div` 2) ++ if even n then "0" else "1"
 
-makeZero :: Int -> String
-makeZero 0 = ""
-makeZero x = "0" ++ makeZero (x - 1)
-
-binary2str :: [Int] -> String
-binary2str [] = ""
-binary2str (x : xs) = show x ++ binary2str xs
+assignZero :: Int -> String -> String
+assignZero 0 str = str
+assignZero x str = "0" ++ assignZero (x - 1) str
 
 main :: IO ()
 main = do
     n <- readLn :: IO Int
-    let ns = toBinary n []
-    putStrLn $ (makeZero $ 10 - (length ns)) ++ (binary2str ns)
+    let binary = toBinary n
+    putStrLn $ assignZero (10 - length binary) binary

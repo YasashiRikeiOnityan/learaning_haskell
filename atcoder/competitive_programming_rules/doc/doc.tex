@@ -202,77 +202,112 @@ main = do
     にする方法は存在しますか。答えをYesかNoで出力するプログラムを作成してください。ただし、制約は$3\ll N\ll 1000$であるとします。
 \end{toi*}
 \begin{lstlisting}[caption=B03.hs,label=B03]
-import Control.Applicative
-
-justNum :: Int -> [Int] -> Bool
-justNum t (x : xs) = if elem True (map (\m -> m + x == t) (xs)) then True else justNum t (xs)
-justNum _ _ = False
-
-justThousand :: [Int] -> Bool
-justThousand (x : xs) = if justNum (1000 - x) xs then True else justThousand xs
-justThousand _ = False
+just :: Int -> Int -> [Int] -> Bool
+just _ _ [] = False
+just 1 num xs = num `elem` xs
+just 2 num (x : xs) = any (\m -> m + x == num) xs || just 2 num xs
+just k num as@(x : xs) = length as >= k && k >= 0
+    && (just (k - 1) (num - x) xs || just k num xs)
 
 main :: IO ()
 main = do
-    n <- read <$> getLine :: IO Int
+    _ <- read <$> getLine :: IO Int
     as <- map read . words <$> getLine :: IO [Int]
-    putStrLn if justThousand as then "Yes" else "No"
+    putStrLn $ if just 3 1000 as then "Yes" else "No"
 \end{lstlisting}
+\begin{ans*}
+    本問も非決定性計算だから、Listing~\ref{A03}と同様に
+    \begin{verbatim}
+    1000 `elem` [x + y + z | x <- as, y <- as, z <- as]
+    \end{verbatim}
+    \vspace*{-4mm}
+    で可能性のある答えを列挙しよう！としては...方針は正しいですが、その手法に誤りが生じています。
+    これでは、同じ商品を選ぶ場合も含まれてしまうからです。\par
+    それでは、関数\texttt{just}について説明します。
+    \texttt{just k num xs}とは、リスト\texttt{xs}から、異なる\texttt{k}個の要素を取り出して足し合わせたとき、
+    その答えが\texttt{num}になることがあるか否かを示す式です。したがって、本文では入力から得たリストに\texttt{just 3 1000}を適用します。
+    \begin{enumerate}
+        \item [$\maruichi$] \texttt{just \_ \_ []}\\
+            リストが空なら、問答無用で\texttt{False}を返します。
+        \item [$\maruni$] \texttt{just 1 num xs}\\
+            リストから1個だけ取り出して、\texttt{num}に等しいかを判定します。おなじみの関数\texttt{elem}を使えば解決です。
+        \item [$\marusan$] \texttt{just 2 num xs}\\
+            まず、\texttt{any (\symbol{`\\}m -> m + x == num) xs}で、先頭要素とその他の要素を足して\texttt{num}になるかを判定しています。
+            そこで、\texttt{True}が得られなかった場合、\texttt{just 2 num xs}で先頭要素を捨てて残りのリストで同じことを試します。
+            以降、再帰的に判定します。
+        \item [$\marushi$] \texttt{just k num xs}\\
+            \texttt{k}個取り出すので、\texttt{k}が負でないこと、リストの長さが\texttt{k}以上であることを判定しておきます。（\chub このような判定を書かずとも、
+            AtCoderでは正しい入力が与えられることが保証されているので問題ありません。しかし、一般的にはそうではないので、意図せぬ入力にも備えておく癖をつけましょう！
+            とは言っても、AtCoderではこれを書くのは手間ですので、やっぱり以降はサボります。）\par
+            あとは、$\marusan$と同様に、まずは先頭要素とその他の要素について条件を満たす組合せが存在するかを判定します。このとき、
+            \texttt{just (k - 1) (num - x) xs}に帰着されることを理解しましょう。
+    \end{enumerate}
+\end{ans*}
 \subsection{2進法}\label{2進法}
 \begin{toi*}
     整数$N$が10進法表記で与えられます。$N$を2進法に変換した値を出力するプログラムを作成してください。
 \end{toi*}
 \begin{lstlisting}[caption=A04.hs,label=A04]
-toBinary :: Int -> [Int] -> [Int]
-toBinary 0 x = x
-toBinary t x = toBinary (div t 2) ([mod t 2] ++ x)
+toBinary :: Int -> String
+toBinary 1 = "1"
+toBinary n = toBinary (n `div` 2) ++ if even n then "0" else "1"
 
-makeZero :: Int -> String
-makeZero 0 = ""
-makeZero x = "0" ++ makeZero (x - 1)
-
-binary2str :: [Int] -> String
-binary2str [] = ""
-binary2str (x : xs) = show x ++ binary2str xs
+assignZero :: Int -> String -> String
+assignZero 0 str = str
+assignZero x str = "0" ++ assignZero (x - 1) str
 
 main :: IO ()
 main = do
-    n <- readLn
-    let ns = toBinary n []
-    putStrLn $ (makeZero $ 10 - (length ns)) ++ (binary2str ns)
+    n <- readLn :: IO Int
+    let binary = toBinary n
+    putStrLn $ assignZero (10 - length binary) binary
 \end{lstlisting}
+\begin{ans*}
+    関数\texttt{toBinary}の動きを見てみましょう。
+    \begin{verbatim}
+    toBinary 12 -> toBinary 6 ++ "0" -> toBinary 3 ++ "00"
+                -> toBinary 1 ++ "100" -> "1100"
+    \end{verbatim}
+    \vspace*{-4mm}
+    どうでしょう？2進数を計算する方法は数Aで習いますね！
+\end{ans*}
 \begin{toi*}
     整数$N$~(8桁以内)が2進法表記で与えられます。$N$を10進法に変換した値を出力するプログラムを作成してください。
 \end{toi*}
 \begin{lstlisting}[caption=B04.hs,label=B04]
-int2list :: Int -> [Int] -> [Int]
-int2list 0 t = t
-int2list x t = int2list (div x 10) ([mod x 10] ++ t)
+bin2list :: Int -> [Int] -> [Int]
+bin2list 0 ys = ys
+bin2list x ys = bin2list (x `div` 10) (x `mod` 10 : ys)
 
-list2int :: [Int] -> Int
-list2int [] = 0
-list2int (x : xs) = x * (2 ^ length xs) + list2int xs
+list2dec :: [Int] -> Int
+list2dec [] = 0
+list2dec [x] = x
+list2dec (x : xs) = x * (2 ^ length xs) + list2dec xs
 
 main :: IO ()
 main = do
-    x <- readLn
-    putStrLn $ show $ list2int $ int2list x []
+    n <- readLn :: IO Int
+    print $ list2dec $ bin2list n []
 \end{lstlisting}
+\begin{ans*}
+    与えられた入力（例えば101011）を
+    \begin{verbatim}
+    101011 -> [1,0,1,0,1,1] -> 2^5 + 2^3 + 2^1 + 2^0 -> 43
+    \end{verbatim}
+    \vspace*{-4mm}
+    という流れで計算しています。入力を\texttt{Int}として受け取り、それをリスト構造に変換しているなら、
+    最初からリスト構造である\texttt{String}で受け取るべきですね。
+\end{ans*}
 \subsection{チャレンジ問題}\label{チャレンジ問題1}
 \begin{toi*}
     赤・青・白の3枚のカードがあります。太郎くんは、それぞれのカードに1以上$N$以下の整数を書かなければなりません。
     3枚のカードの合計を$K$にするような書き方は何通りありますか。
 \end{toi*}
 \begin{lstlisting}[caption=A05.hs,label=A05]
-import Control.Applicative
-
-third :: (Int, Int, Int) -> Int
-third (_, _, c) = c
-
 main :: IO ()
 main = do
-    [n, k] <- map read . words <$> getLine
-    putStrLn $ show $ length [(a, b, c) | a <- [1..n], b <- [1..n], let c = k - a - b, 1 <= c, c <= n]
+    [n, k] <- map read . words <$> getLine :: IO [Int]
+    print $ length [(a, b, c) | a <- [1..n], b <- [1..n], let c = k - a - b, 1 <= c, c <= n]
 \end{lstlisting}
 \section{累積和}\label{累積和}
 \subsection{一次元の累積和}\label{一次元の累積和}

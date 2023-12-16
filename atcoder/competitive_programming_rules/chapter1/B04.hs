@@ -1,12 +1,13 @@
-int2list :: Int -> [Int] -> [Int]
-int2list 0 t = t
-int2list x t = int2list (div x 10) (mod x 10 : t)
+bin2list :: Int -> [Int] -> [Int]
+bin2list 0 ys = ys
+bin2list x ys = bin2list (x `div` 10) (x `mod` 10 : ys)
 
-list2int :: [Int] -> Int
-list2int [] = 0
-list2int (x : xs) = x * (2 ^ length xs) + list2int xs
+list2dec :: [Int] -> Int
+list2dec [] = 0
+list2dec [x] = x
+list2dec (x : xs) = x * (2 ^ length xs) + list2dec xs
 
 main :: IO ()
 main = do
-    x <- readLn
-    print $ list2int $ int2list x []
+    n <- readLn :: IO Int
+    print $ list2dec $ bin2list n []

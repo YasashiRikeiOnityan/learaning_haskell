@@ -1,13 +1,12 @@
-justNum :: Int -> [Int] -> Bool
-justNum t (x : xs) = any (\m -> m + x == t) xs || justNum t xs
-justNum _ _ = False
-
-justThousand :: [Int] -> Bool
-justThousand (x : xs) = justNum (1000 - x) xs || justThousand xs
-justThousand _ = False
+just :: Int -> Int -> [Int] -> Bool
+just _ _ [] = False
+just 1 num xs = num `elem` xs
+just 2 num (x : xs) = any (\m -> m + x == num) xs || just 2 num xs
+just k num as@(x : xs) = length as >= k && k >= 0
+    && (just (k - 1) (num - x) xs || just k num xs)
 
 main :: IO ()
 main = do
-    n <- read <$> getLine :: IO Int
+    _ <- read <$> getLine :: IO Int
     as <- map read . words <$> getLine :: IO [Int]
-    if justThousand as then putStrLn "Yes" else putStrLn "No"
+    putStrLn $ if just 3 1000 as then "Yes" else "No"
