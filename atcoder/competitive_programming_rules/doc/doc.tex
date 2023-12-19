@@ -281,7 +281,6 @@ bin2list x ys = bin2list (x `div` 10) (x `mod` 10 : ys)
 
 list2dec :: [Int] -> Int
 list2dec [] = 0
-list2dec [x] = x
 list2dec (x : xs) = x * (2 ^ length xs) + list2dec xs
 
 main :: IO ()
@@ -331,83 +330,110 @@ main = do
         \item [] 質問$Q$：$L_Q$日目から$R_Q$までの来場者数は？
     \end{itemize}
 \end{toi*}
-\begin{lstlisting}[caption=A06.hs,label=A06]
-import Control.Monad ( replicateM )
+\begin{lstlisting}[caption=A06\_00.hs,label=A06_00]
+import Control.Monad ( replicateM_ )
 
 cumulativeSum :: [Int] -> [Int]
-cumulativeSum [] = []
-cumulativeSum [x] = [x]
-cumulativeSum (x : xs) = x : cumulativeSum ((x + head xs) : tail xs)
+cumulativeSum = scanl (+) 0
 
-calc :: [Int] -> [Int] -> Int
-calc s [l, r] = if l == 1 then s !! r else (s !! (r - 1)) - (s !! (l - 2))
-
-makeOutput :: [Int] -> String
-makeOutput [x] = show x
-makeOutput (x : xs) = show x ++ "\n" ++ makeOutput xs
+solve :: [Int] -> [Int] -> Int
+solve s [l, r] = (s !! r) - (s !! (l - 1))
 
 main :: IO ()
 main = do
     [_, q] <- map read . words <$> getLine :: IO [Int]
     as <- map read . words <$> getLine :: IO [Int]
-    lr <- replicateM q getLine :: IO [String]
-    let x = map words lr
-    let y = map (\m -> map read m :: [Int]) x
-    putStrLn $ makeOutput $ map (calc (cumulativeSum as)) y
+    let cumSum = cumulativeSum as
+    replicateM_ q $ do
+        lr <- map read . words <$> getLine :: IO [Int]
+        print $ solve cumSum lr
 \end{lstlisting}
-\begin{toi*}
-    太郎君はくじを$N$回引き、$i$回目の結果は$A_i$でした。$A_i=1$のときアタリ、$A_i=0$のときハズレを意味します。
-    「$L$回目から$R$回目までの中では、アタリとハズレどちらが多いか？」という形式の質問が$Q$個与えられるので、
-    それぞれの質問に答えるプログラムを作成してください。計算量は$O(N+Q)$であることが望ましいです。
-\end{toi*}
-\begin{lstlisting}[caption=B06.hs,label=B06]
-import Control.Monad ( replicateM )
+\begin{ans*}
+    新しい関数がたくさん登場しました。一つずつ紹介します。\par
+    関数\texttt{scanl}の定義は以下です。
+    \begin{verbatim}
+    scanl :: (b -> a -> b) -> b -> [a] -> [b]
+    scanl = scanlGo
+        where
+            scanlGo :: (b -> a -> b) -> b -> [a] -> [b]
+            scanlGo f q ls = q : (case ls of
+                            []   -> []
+                            x:xs -> scanlGo f (f q x) xs)
+    \end{verbatim}
+    \vspace*{-4mm}
+    なぜ、\texttt{scanlGo}を挟んでいるのか！？（2023年12月16日：実力不足によりまだわかっておりません。）
+    実装自体は理解できそうですね！動作を見てみましょう。
+    \begin{verbatim}
+    scanl (+) 0 [1,2,3,4,5] -> [0,1,3,6,10,15]
+    \end{verbatim}
+    \vspace*{-4mm}
+    これがまさに累積和になります。引数のリストの長さを$N$とすると、関数\texttt{cumulativeSum}は$O(N)$となります。
+    上記の例で考えると、2日目から4日目までの来場者数は、\texttt{10 - 1 = 9}（人）となります。3日目から5日目までの来場者数は、
+    \texttt{15 - 3 = 12}（人）となります。\par
+    リストの\texttt{k}番目の要素にアクセスするために関数\texttt{(!!)}が使えます。したがって、質問に回答する関数\texttt{solve}
+    は
+    \begin{verbatim}
+    solve s [l, r] = (s !! r) - (s !! (l - 1))
+    \end{verbatim}
+    \vspace*{-4mm}
+    と定義できます。(「0日目は累計0人」という無意味な情報をリストの先頭に置いておくことで、リストのインデックスと日にちの数字が同じ数字になるので扱いやすくなっています。)
+    これを、関数\texttt{replicateM\_}を用いて\texttt{q}個の質問に適用します。ここでは、使用例だけ紹介します。
+    \begin{verbatim}
+    ghci> replicateM_ 3 (putStrLn "a")
+    a
+    a
+    a
+    \end{verbatim}
+    \vspace*{-4mm}
+    \par
+    これで完成！いえ、実行時間超過です。なぜでしょう... オーダーに問題があります。プログラムとしては正しい出力が得られます。
+    このプログラムは$O(N^2)$であり、$0\ll N\ll 10^5$から、最悪計算量が$10^{10}$となってしまうため制限時間超過となります。問題文では、
+    $O(N+Q)$であることが望ましいと書かれていますので、それを目標にプログラムを変更しましょう。\par
+    関数\texttt{cumulativeSum}は$O(N)$で、関数\texttt{replicateM\_}は$O(Q)$です。したがって、関数\texttt{(!!)}が$O(1)$であれば、非常に嬉しい！ということになります。
+    しかしながら、$O(N)$であるようです。下記の定義からも確認できますね。
+    \begin{verbatim}
+    (!!) :: [a] -> Int -> a
+    xs     !! n | n < 0 =  errorWithoutStackTrace 
+                                "Prelude.!!: negative index"
+    []     !! _         =  errorWithoutStackTrace 
+                                "Prelude.!!: index too large"
+    (x:_)  !! 0         =  x
+    (_:xs) !! n         =  xs !! (n-1)
+    \end{verbatim}
+    \vspace*{-4mm}
+    では、$O(1)$で配列の要素にアクセスするにはどうしたらよいのでしょうか？ \texttt{Data.Array}モジュールを使いましょう。
+\end{ans*}
+\begin{lstlisting}[caption=A06\_01.hs,label=A06_01]
+import Control.Monad ( replicateM_ )
+import Data.Array ( Array, (!), elems, listArray )
 
-cumulativeSum :: Int -> [Int] -> [Int] -> [Int]
-cumulativeSum t i [] = if length i > 1 then tail i else []
-cumulativeSum t i [x] = if t == x then tail $ i ++ [1 + last i] else tail $ i ++ [last i]
-cumulativeSum t i (x : xs) = if t == x then cumulativeSum t (i ++ [1 + last i]) xs else cumulativeSum t (i ++ [last i]) xs
-    
-cumulativeSumOne :: [Int] -> [Int]
-cumulativeSumOne [] = []
-cumulativeSumOne (x : xs) = scanl (+) x xs
+cumulativeSum :: Int -> Int -> Array Int Int -> Array Int Int
+cumulativeSum l r as = listArray (l, r) $ scanl (+) 0 $ elems as
 
-cumulativeSumZero :: [Int] -> [Int]
-cumulativeSumZero [] = []
-cumulativeSumZero x = cumulativeSumOne $ map (\m -> if m == 0 then 1 else 0) x
-
-calc :: [Int] -> [Int] -> Int
-calc s [l, r] = if l == 1 then s !! (r - 1) else (s !! (r - 1)) - (s !! (l - 2))
-
-minus :: [Int] -> [Int] -> [Int]
-minus [] [y] = [-y]
-minus [x] [] = [x]
-minus [x] [y] = [x - y]
-minus (x : xs) (y : ys) =(x - y) : minus xs ys
-
-makeOutput :: [Int] -> String
-makeOutput x = unlines $ map (\x -> if x > 0 then "win" else if x == 0 then "draw" else "lose") x
+solve :: Array Int Int -> [Int] -> Int
+solve s [l, r] = (s ! r) - (s ! (l - 1))
 
 main :: IO ()
 main = do
-    n <- readLn :: IO Int
-    as <- map read . words <$> getLine :: IO [Int]
-    q <- readLn :: IO Int
-    lr <- replicateM q getLine :: IO [String]
-    let x = map words lr :: [[String]]
-    let y = map (\m -> map read m :: [Int]) x :: [[Int]]
-    let win = cumulativeSumOne as :: [Int]
-    let lose = cumulativeSumZero as :: [Int]
-    putStrLn $ makeOutput (minus (map (calc win) y) (map (calc lose) y)) :: IO ()
+    [n, q] <- map read . words <$> getLine :: IO [Int]
+    as <- listArray (0, n - 1) . map read . words <$> getLine :: IO (Array Int Int)
+    let cumSum = cumulativeSum 0 n as
+    replicateM_ q $ do
+        lr <- map read . words <$> getLine :: IO [Int]
+        print $ solve cumSum lr
 \end{lstlisting}
-\begin{ans*}
-    実行時間超過です。累積和を計算する関数\ttt{cumulativeSumZero}のオーダーに問題があります。プログラムとしては正しい出力が得られます。
-    この関数は$O(N^2)$であり、$0\ll N\ll 10^5$から、最悪計算量が$10^{10}$となってしまうため制限時間超過となります。問題文では、
-    $O(N+Q)$であることが望ましいと書かれていますので、それを目標にプログラムを変更しましょう。
-\end{ans*}
-%\emovalbox{AC}
-\begin{toi*}
-    ある会社ではD日間にわたってイベントが開催され、N人が出席します。参加者$i$は$L_i$日目から$R_i$日目まで出席する予定です。
-    各日の出席者数を出力するプログラムを作ってください。
-\end{toi*}
+
+% \begin{toi*}
+%     太郎君はくじを$N$回引き、$i$回目の結果は$A_i$でした。$A_i=1$のときアタリ、$A_i=0$のときハズレを意味します。
+%     「$L$回目から$R$回目までの中では、アタリとハズレどちらが多いか？」という形式の質問が$Q$個与えられるので、
+%     それぞれの質問に答えるプログラムを作成してください。計算量は$O(N+Q)$であることが望ましいです。
+% \end{toi*}
+% \begin{lstlisting}[caption=B06.hs,label=B06]
+% \end{lstlisting}
+% \begin{ans*}
+% \end{ans*}
+% \begin{toi*}
+%     ある会社ではD日間にわたってイベントが開催され、N人が出席します。参加者$i$は$L_i$日目から$R_i$日目まで出席する予定です。
+%     各日の出席者数を出力するプログラムを作ってください。
+% \end{toi*}
 \end{document}
