@@ -1,9 +1,9 @@
 import Control.Monad ( replicateM )
+import Data.Array
 
--- cumulativeSum :: Int -> [Int] -> [Int] -> [Int]
--- cumulativeSum t i [] = if length i > 1 then tail i else []
--- cumulativeSum t i [x] = if t == x then tail $ i ++ [1 + last i] else tail $ i ++ [last i]
--- cumulativeSum t i (x : xs) = if t == x then cumulativeSum t (i ++ [1 + last i]) xs else cumulativeSum t (i ++ [last i]) xs
+cumulativeSum :: Int -> Int -> Array Int Int -> Array Int Int
+cumulativeSum l r as = listArray (l, r) $ 
+    scanl (\x -> if x == 0 then subtract 1 else (+1)) 0 $ elems as
 
 cumulativeSumOne :: [Int] -> [Int]
 cumulativeSumOne [] = []
