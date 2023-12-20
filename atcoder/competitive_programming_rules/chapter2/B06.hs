@@ -1,38 +1,22 @@
-import Control.Monad ( replicateM )
-import Data.Array
+import Control.Monad ( replicateM_ )
+import Data.Array ( Array, (!), elems, listArray )
 
-cumulativeSum :: Int -> Int -> Array Int Int -> Array Int Int
-cumulativeSum l r as = listArray (l, r) $ 
-    scanl (\x -> if x == 0 then subtract 1 else (+1)) 0 $ elems as
+cumulativeSum :: (Int, Int) -> Array Int Int -> Array Int Int
+cumulativeSum lr xs = listArray lr $ scanl (+) 0 $ elems xs
 
-cumulativeSumOne :: [Int] -> [Int]
-cumulativeSumOne [] = []
-cumulativeSumOne (x : xs) = scanl (+) x xs
-
-cumulativeSumZero :: [Int] -> [Int]
-cumulativeSumZero [] = []
-cumulativeSumZero x = cumulativeSumOne $ map (\m -> if m == 0 then 1 else 0) x
-
-calc :: [Int] -> [Int] -> Int
-calc s [l, r] = if l == 1 then s !! (r - 1) else (s !! (r - 1)) - (s !! (l - 2))
-
-minus :: [Int] -> [Int] -> [Int]
-minus [] [y] = [-y]
-minus [x] [] = [x]
-minus [x] [y] = [x - y]
-minus (x : xs) (y : ys) =(x - y) : minus xs ys
-
-makeOutput :: [Int] -> String
-makeOutput x = unlines $ map (\x -> if x > 0 then "win" else if x == 0 then "draw" else "lose") x
+solve :: Array Int Int -> (Int, Int) -> Int
+solve s (l, r) = (s ! r) - (s ! (l - 1))
 
 main :: IO ()
 main = do
     n <- readLn :: IO Int
-    as <- map read . words <$> getLine :: IO [Int]
+    as <- listArray (0, n - 1) . map read . words <$> getLine :: IO (Array Int Int)
     q <- readLn :: IO Int
-    lr <- replicateM q getLine :: IO [String]
-    let x = map words lr :: [[String]]
-    let y = map (\m -> map read m :: [Int]) x :: [[Int]]
-    let win = cumulativeSumOne as :: [Int]
-    let lose = cumulativeSumZero as :: [Int]
-    putStrLn $ makeOutput (minus (map (calc win) y) (map (calc lose) y)) :: IO ()
+    let cumSum = cumulativeSum (0, n) as
+    replicateM_ q $ do 
+        [l, r] <- map read . words <$> getLine :: IO [Int]
+        let t = solve cumSum (l, r)
+        putStrLn $ case (r - l + 1 - t) `compare` t of
+            GT -> "lose"
+            EQ -> "draw"
+            LT -> "win"
