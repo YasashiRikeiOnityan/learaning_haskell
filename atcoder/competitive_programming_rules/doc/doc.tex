@@ -99,7 +99,7 @@ main = do
     \ttt{readLn}の型は\ttt{Read a => IO a}です。ここで、\ttt{:: IO Int}と後ろに記述することで型変数\ttt{a}は\ttt{Int}型であると宣言することができます。
     もちろん、書かなくても\ttt{(*)}という演算が後ろで行われていることから、型クラス\ttt{Num}に属することを推論してくれます。
     （書いた方が見やすいのではないでしょうか？）\ttt{n <- readLn :: IO Int}を実行すると、\ttt{n}は通常の整数値になります。
-    \ttt{show}の型は\ttt{Show a => a -> String}であるから、\ttt{n * n}の結果を\ttt{show}に渡すことで、整数値を文字列に変換することができます。
+    \ttt{show}の型は\ttt{Show a => a -> String}ですので、\ttt{n * n}の結果を\ttt{show}に渡すことで、整数値を文字列に変換することができます。
     最後に\ttt{String -> IO ()}という型をもつ\ttt{putStrLn}に渡せば完了です。
 \end{ans*}
 \begin{toi*}
@@ -118,7 +118,7 @@ main = do
     f <$> x = fmap f x
     \end{verbatim}
     \vspace*{-4mm}
-    \ttt{<\$>}の型に注目して下さい。\ttt{IO}は\ttt{Functor}のインスタンスであるから、\ttt{f}を\ttt{IO}に置き換えると、
+    \ttt{<\$>}の型に注目して下さい。\ttt{IO}は\ttt{Functor}のインスタンスですので、\ttt{f}を\ttt{IO}に置き換えると、
     \ttt{<\$> :: (a -> b) -> IO a -> IO b}となります。
     また、
     \begin{itemize}
@@ -195,7 +195,7 @@ main = do
     \end{verbatim}
     \vspace*{-4mm}
     と書くことができます。これについては{\bf アプリカティブ}という用語を聞くまでは保留で構いません。非決定性計算という言葉も同様です。
-    （いずれ、後者の記法の方がきれいだと感じる日が来るはずです！私はまだ来ていませんが。）
+    （いずれ、後者の記法の方がきれいだと感じる日が来るはずです！私は内包表記も好きです。）
 \end{ans*}
 \begin{toi*}
     $N$個の商品があり、商品$i~(1\ll i\ll N)$の価格は$A_i$円です。異なる3つの商品を選び、合計価格をピッタリ1000円
@@ -295,7 +295,7 @@ main = do
     \end{verbatim}
     \vspace*{-4mm}
     という流れで計算しています。入力を\texttt{Int}として受け取り、それをリスト構造に変換しているなら、
-    最初からリスト構造である\texttt{String}で受け取るべきですね。\par
+    最初からリスト構造である\texttt{String}で受け取るべきかもしれませんね。\par
     おっと、関数\texttt{print}が初登場しました。型は以下のようになっています。
     \texttt{putStrLn}との違いを見てみましょう。
     \begin{verbatim}
@@ -320,7 +320,7 @@ main = do
     出来上がったトリプルのリストの長さが答えになります。
 \end{ans*}
 \section{累積和}\label{累積和}
-\subsection{一次元の累積和}\label{一次元の累積和}
+\subsection{一次元の累積和(1)}\label{一次元の累積和(1)}
 \begin{toi*}
     ある遊園地では$N$日間にわたるイベントが開催され、$i$日目には$A_i$人が来場しました。
     以下の$Q$個の質問に答えるプログラムを作成してください。
@@ -361,7 +361,7 @@ main = do
                             x:xs -> scanlGo f (f q x) xs)
     \end{verbatim}
     \vspace*{-4mm}
-    なぜ、\texttt{scanlGo}を挟んでいるのか！？（2023年12月16日：実力不足によりまだわかっておりません。）
+    なぜ、\texttt{scanlGo}を挟んでいるのか！？（実力不足によりわかっておりません。）
     実装自体は理解できそうですね！動作を見てみましょう。
     \begin{verbatim}
     scanl (+) 0 [1,2,3,4,5] -> [0,1,3,6,10,15]
@@ -376,7 +376,7 @@ main = do
     solve s [l, r] = (s !! r) - (s !! (l - 1))
     \end{verbatim}
     \vspace*{-4mm}
-    と定義できます。(「0日目は累計0人」という無意味な情報をリストの先頭に置いておくことで、リストのインデックスと日にちの数字が同じ数字になるので扱いやすくなっています。)
+    と定義できます。(「0日目は累計0人」という無意味とも思える情報をリストの先頭に置いておくことで、リストのインデックスと日にちの数字が同じ数字になるので扱いやすくなっています。)
     これを、関数\texttt{replicateM\_}を用いて\texttt{q}個の質問に適用します。ここでは、使用例だけ紹介します。
     \begin{verbatim}
     ghci> replicateM_ 3 (putStrLn "a")
@@ -386,11 +386,11 @@ main = do
     \end{verbatim}
     \vspace*{-4mm}
     \par
-    これで完成！いえ、実行時間超過です。なぜでしょう... オーダーに問題があります。プログラムとしては正しい出力が得られます。
-    このプログラムは$O(N^2)$であり、$0\ll N\ll 10^5$から、最悪計算量が$10^{10}$となってしまうため制限時間超過となります。問題文では、
+    これで完成！いえ、実行時間超過です。なぜでしょう... オーダーに問題があります。プログラムとしては正しい出力が得られますが、
+    このプログラムは$O(N^2)$となっています。$0\ll N\ll 10^5$ですので、最悪計算量が$10^{10}$となってしまうため制限時間超過となります。問題文では、
     $O(N+Q)$であることが望ましいと書かれていますので、それを目標にプログラムを変更しましょう。\par
     関数\texttt{cumulativeSum}は$O(N)$で、関数\texttt{replicateM\_}は$O(Q)$です。したがって、関数\texttt{(!!)}が$O(1)$であれば、非常に嬉しい！ということになります。
-    しかしながら、$O(N)$であるようです。下記の定義からも確認できますね。
+    しかしながら、関数\texttt{(!!)}は$O(N)$であるようです。下記の定義からも確認できますね。
     \begin{verbatim}
     (!!) :: [a] -> Int -> a
     xs     !! n | n < 0 =  errorWithoutStackTrace 
@@ -402,13 +402,24 @@ main = do
     \end{verbatim}
     \vspace*{-4mm}
     では、$O(1)$で配列の要素にアクセスするにはどうしたらよいのでしょうか？ \texttt{Data.Array}モジュールを使いましょう。
+    関数\texttt{listArray}はインデックスの範囲とリストを引数に取り、インデックスの付いたリストを返してくれます。
+    \begin{verbatim}
+    listArray (0, 5) [0,1,3,6,10,15]
+    -> array (0, 5) [(0,0), (1,1), (2,3), (3,6), (4,10), (5,15)]
+    \end{verbatim}
+    \vspace*{-4mm}
+    リストにインデックスが付くことにより、$i$番目の要素に$O(1)$でアクセスできるようになります。
+    リストにアクセスする関数は\texttt{(!)}です。\par
+    これらを用いて変更したプログラムはListing~\ref{A06_01}のようになります。関数\texttt{cumulativeSum}では、
+    累積和を取ったのちに関数\texttt{listArray}を適用しています。関数\texttt{solve}では、関数\texttt{(!!)}が
+    関数\texttt{(!)}に変わっただけですね！
 \end{ans*}
 \begin{lstlisting}[caption=A06\_01.hs,label=A06_01]
 import Control.Monad ( replicateM_ )
-import Data.Array ( Array, (!), elems, listArray )
+import Data.Array ( Array, (!), listArray )
 
-cumulativeSum :: Int -> Int -> Array Int Int -> Array Int Int
-cumulativeSum l r as = listArray (l, r) $ scanl (+) 0 $ elems as
+cumulativeSum :: Int -> Int -> [Int] -> Array Int Int
+cumulativeSum l r as = listArray (l, r) $ scanl (+) 0 as
 
 solve :: Array Int Int -> [Int] -> Int
 solve s [l, r] = (s ! r) - (s ! (l - 1))
@@ -416,12 +427,27 @@ solve s [l, r] = (s ! r) - (s ! (l - 1))
 main :: IO ()
 main = do
     [n, q] <- map read . words <$> getLine :: IO [Int]
-    as <- listArray (0, n - 1) . map read . words <$> getLine :: IO (Array Int Int)
+    as <- map read . words <$> getLine :: IO [Int]
     let cumSum = cumulativeSum 0 n as
     replicateM_ q $ do
         lr <- map read . words <$> getLine :: IO [Int]
         print $ solve cumSum lr
 \end{lstlisting}
+\chub ここで初めて、Figure~\ref{初めての警告}のように警告が表示されたのではないでしょうか？
+関数\texttt{solve}の第二引数にパターン漏れがあるらしいです。その通りなのですが、AtCoderに絶大な信頼を置いているので、
+期待外れの入力が来ないことを前提に、この警告を解消せずに進めていきましょう。警告を解消するとしたら、
+\begin{verbatim}
+    solve :: Array Int Int -> [Int] -> Int
+    solve s [l, r] = (s ! r) - (s ! (l - 1))
+    solve _ _ = -1
+\end{verbatim}
+のように、来場者数としてあり得ない数値を返すようにしておきましょう。
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=\textwidth]{img/first-warning.png}
+    \caption{初めての警告}
+    \label{初めての警告}
+\end{figure}
 
 % \begin{toi*}
 %     太郎君はくじを$N$回引き、$i$回目の結果は$A_i$でした。$A_i=1$のときアタリ、$A_i=0$のときハズレを意味します。
@@ -436,4 +462,8 @@ main = do
 %     ある会社ではD日間にわたってイベントが開催され、N人が出席します。参加者$i$は$L_i$日目から$R_i$日目まで出席する予定です。
 %     各日の出席者数を出力するプログラムを作ってください。
 % \end{toi*}
+\subsection{一次元の累積和(2)}\label{一次元の累積和(2)}
+\subsection{二次元の累積和(1)}\label{二次元の累積和(1)}
+\subsection{二次元の累積和(2)}\label{二次元の累積和(2)}
+\subsection{チャレンジ問題}\label{チャレンジ問題2}
 \end{document}

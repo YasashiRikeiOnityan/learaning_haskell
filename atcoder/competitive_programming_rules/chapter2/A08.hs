@@ -9,9 +9,13 @@ twoDimensionalSum h w xs = listArray ((0, 0), (h, w))
                          $ scanl (zipWith (+)) (replicate (w + 1) 0)
                          $ map (scanl (+) 0) xs
 
+
 solve :: Array (Int, Int) Int -> [[Int]] -> [Int]
-solve twoDimSum = map (\[x, y, z, w] -> twoDimSum ! (x - 1, y - 1) + twoDimSum ! (z, w) 
-                                      - twoDimSum ! (z, y - 1) - twoDimSum ! (x - 1, w))
+solve twoDimSum = map calc   
+    where calc forth = case forth of 
+            [x, y, z, w] -> twoDimSum ! (x - 1, y - 1) + twoDimSum ! (z, w) 
+                          - twoDimSum ! (z, y - 1) - twoDimSum ! (x - 1, w)
+            _ -> -1
 
 main :: IO ()
 main = do
