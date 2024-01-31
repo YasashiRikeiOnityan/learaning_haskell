@@ -401,15 +401,14 @@ main = do
     (_:xs) !! n         =  xs !! (n-1)
     \end{verbatim}
     \vspace*{-4mm}
-    では、$O(1)$で配列の要素にアクセスするにはどうしたらよいのでしょうか？ \texttt{Data.Array}モジュールを使いましょう。
-    関数\texttt{listArray}はインデックスの範囲とリストを引数に取り、インデックスの付いたリストを返してくれます。
+    では、$O(1)$でリストの要素にアクセスするにはどうしたらよいのでしょうか？ \texttt{Data.Array}モジュールを使いましょう。
+    関数\texttt{listArray}はインデックスの範囲とリストを引数に取り、インデックスの付いた配列を返してくれます。
     \begin{verbatim}
     listArray (0, 5) [0,1,3,6,10,15]
     -> array (0, 5) [(0,0), (1,1), (2,3), (3,6), (4,10), (5,15)]
     \end{verbatim}
     \vspace*{-4mm}
-    リストにインデックスが付くことにより、$i$番目の要素に$O(1)$でアクセスできるようになります。
-    リストにアクセスする関数は\texttt{(!)}です。\par
+    配列では、$i$番目の要素に$O(1)$でアクセスでき、アクセスする関数は\texttt{(!)}となっています。\par
     これらを用いて変更したプログラムはListing~\ref{A06_01}のようになります。関数\texttt{cumulativeSum}では、
     累積和を取ったのちに関数\texttt{listArray}を適用しています。関数\texttt{solve}では、関数\texttt{(!!)}が
     関数\texttt{(!)}に変わっただけですね！
@@ -421,8 +420,8 @@ import Data.Array ( Array, (!), listArray )
 cumulativeSum :: Int -> Int -> [Int] -> Array Int Int
 cumulativeSum l r as = listArray (l, r) $ scanl (+) 0 as
 
-solve :: Array Int Int -> [Int] -> Int
-solve s [l, r] = (s ! r) - (s ! (l - 1))
+solve :: Array Int Int -> (Int, Int) -> Int
+solve s (l, r) = (s ! r) - (s ! (l - 1))
 
 main :: IO ()
 main = do
@@ -430,39 +429,69 @@ main = do
     as <- map read . words <$> getLine :: IO [Int]
     let cumSum = cumulativeSum 0 n as
     replicateM_ q $ do
-        lr <- map read . words <$> getLine :: IO [Int]
-        print $ solve cumSum lr
+        [l, r] <- map read . words <$> getLine :: IO [Int]
+        print $ solve cumSum (l, r)
 \end{lstlisting}
-\chub ここで初めて、Figure~\ref{初めての警告}のように警告が表示されたのではないでしょうか？
-関数\texttt{solve}の第二引数にパターン漏れがあるらしいです。その通りなのですが、AtCoderに絶大な信頼を置いているので、
-期待外れの入力が来ないことを前提に、この警告を解消せずに進めていきましょう。警告を解消するとしたら、
-\begin{verbatim}
-    solve :: Array Int Int -> [Int] -> Int
-    solve s [l, r] = (s ! r) - (s ! (l - 1))
-    solve _ _ = -1
-\end{verbatim}
-のように、来場者数としてあり得ない数値を返すようにしておきましょう。
-\begin{figure}[htbp]
-    \centering
-    \includegraphics[width=\textwidth]{img/first-warning.png}
-    \caption{初めての警告}
-    \label{初めての警告}
-\end{figure}
+% \chub ここで初めて、Figure~\ref{初めての警告}のように警告が表示されたのではないでしょうか？
+% 関数\texttt{solve}の第二引数にパターン漏れがあるらしいです。AtCoderに絶大な信頼を寄せており、
+% 期待外れの入力が来ないことは承知の上ですが、この警告を解消するとしたら、
+% \begin{verbatim}
+%     solve :: Array Int Int -> [Int] -> Int
+%     solve s [l, r] = (s ! r) - (s ! (l - 1))
+%     solve _ _ = -1
+% \end{verbatim}
+% のように、来場者数としてあり得ない数値を返すようにしておきましょう。以降、このような警告は解消しない方針で進めていきます。
+% なぜかって？
+% \begin{verbatim}
+%     [n, q] <- map read . words <$> getLine :: IO [Int]
+% \end{verbatim}
+% こう書いてる時点で入力が正しい前提で進めていますからね！{\bf 型安全}にストイックなあなたはこの辺りの実装も怠らずに進めていきましょう。
+% \begin{figure}[htbp]
+%     \centering
+%     \includegraphics[width=\textwidth]{img/first-warning.png}
+%     \caption{初めての警告}
+%     \label{初めての警告}
+% \end{figure}
+% \sankoua 今回の関数\texttt{solve}では、第二引数に長さ4のリストを渡してもらいたいわけですが、単に\texttt{[Int]}と書くだけでは
+% リストの長さに制限はされないため、関数内の実装で調整するしかありません。しかし、型のレベルでリストの長さを制限できないのでしょうか？
+% 初めて聞く方もいると思いますが、{\bf 依存型}を用いることで型レベルでリストの長さを制限することが可能になります。
+% 詳しくは、Haskell$+$依存型とも呼ばれる、プログラミング言語Idrisを調べてみてください。
+\begin{toi*}
+    太郎君はくじを$N$回引き、$i$回目の結果は$A_i$でした。$A_i=1$のときアタリ、$A_i=0$のときハズレを意味します。
+    「$L$回目から$R$回目までの中では、アタリとハズレどちらが多いか？」という形式の質問が$Q$個与えられるので、
+    それぞれの質問に答えるプログラムを作成してください。計算量は$O(N+Q)$であることが望ましいです。
+\end{toi*}
+\begin{lstlisting}[caption=B06.hs,label=B06]
+import Control.Monad ( replicateM_ )
+import Data.Array ( Array, (!), listArray )
 
-% \begin{toi*}
-%     太郎君はくじを$N$回引き、$i$回目の結果は$A_i$でした。$A_i=1$のときアタリ、$A_i=0$のときハズレを意味します。
-%     「$L$回目から$R$回目までの中では、アタリとハズレどちらが多いか？」という形式の質問が$Q$個与えられるので、
-%     それぞれの質問に答えるプログラムを作成してください。計算量は$O(N+Q)$であることが望ましいです。
-% \end{toi*}
-% \begin{lstlisting}[caption=B06.hs,label=B06]
-% \end{lstlisting}
-% \begin{ans*}
-% \end{ans*}
-% \begin{toi*}
-%     ある会社ではD日間にわたってイベントが開催され、N人が出席します。参加者$i$は$L_i$日目から$R_i$日目まで出席する予定です。
-%     各日の出席者数を出力するプログラムを作ってください。
-% \end{toi*}
+cumulativeSum :: (Int, Int) -> [Int] -> Array Int Int
+cumulativeSum lr xs = listArray lr $ scanl (+) 0 xs
+
+solve :: Array Int Int -> (Int, Int) -> Int
+solve s (l, r) = (s ! r) - (s ! (l - 1))
+
+main :: IO ()
+main = do
+    n <- readLn :: IO Int
+    as <- map read . words <$> getLine :: IO [Int]
+    q <- readLn :: IO Int
+    let cumSum = cumulativeSum (0, n) as
+    replicateM_ q $ do 
+        [l, r] <- map read . words <$> getLine :: IO [Int]
+        let t = solve cumSum (l, r)
+        putStrLn $ case (r - l + 1 - t) `compare` t of
+            GT -> "lose"
+            EQ -> "draw"
+            LT -> "win"
+\end{lstlisting}
+\begin{ans*}
+\end{ans*}
 \subsection{一次元の累積和(2)}\label{一次元の累積和(2)}
+\begin{toi*}
+    ある会社ではD日間にわたってイベントが開催され、N人が出席します。参加者$i$は$L_i$日目から$R_i$日目まで出席する予定です。
+    各日の出席者数を出力するプログラムを作ってください。
+\end{toi*}
 \subsection{二次元の累積和(1)}\label{二次元の累積和(1)}
 \subsection{二次元の累積和(2)}\label{二次元の累積和(2)}
 \subsection{チャレンジ問題}\label{チャレンジ問題2}

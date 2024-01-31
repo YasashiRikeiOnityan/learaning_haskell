@@ -1,6 +1,6 @@
 module A08 where
 
-import Control.Monad (replicateM)
+import Control.Monad ( replicateM )
 import Data.Array ( Array, (!), listArray )
 
 twoDimensionalSum :: Int -> Int -> [[Int]] -> Array (Int, Int) Int
@@ -9,13 +9,9 @@ twoDimensionalSum h w xs = listArray ((0, 0), (h, w))
                          $ scanl (zipWith (+)) (replicate (w + 1) 0)
                          $ map (scanl (+) 0) xs
 
-
 solve :: Array (Int, Int) Int -> [[Int]] -> [Int]
-solve twoDimSum = map calc   
-    where calc forth = case forth of 
-            [x, y, z, w] -> twoDimSum ! (x - 1, y - 1) + twoDimSum ! (z, w) 
-                          - twoDimSum ! (z, y - 1) - twoDimSum ! (x - 1, w)
-            _ -> -1
+solve twoDimSum = map (\[x, y, z, w] -> twoDimSum ! (x - 1, y - 1) + twoDimSum ! (z, w) 
+                                      - twoDimSum ! (z, y - 1) - twoDimSum ! (x - 1, w))
 
 main :: IO ()
 main = do
