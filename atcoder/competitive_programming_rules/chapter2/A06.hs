@@ -17,7 +17,7 @@ main = do
         print $ solve cumSum lr
 -}
 
-import Control.Monad ( replicateM_ )
+import Control.Monad ( replicateM )
 import Data.Array ( Array, (!), listArray )
 
 cumulativeSum :: Int -> Int -> [Int] -> Array Int Int
@@ -28,10 +28,8 @@ solve s (l, r) = (s ! r) - (s ! (l - 1))
 
 main :: IO ()
 main = do
-    [n, q] <- map read . words <$> getLine :: IO [Int]
-    as <- map read . words <$> getLine :: IO [Int]
+    [n, q] <- map read . words <$> getLine
+    as <- map read . words <$> getLine
+    lrs <- map ((\[l, r] -> (l, r)) . map read . words) <$> replicateM q getLine
     let cumSum = cumulativeSum 0 n as
-    replicateM_ q $ do
-        [l, r] <- map read . words <$> getLine :: IO [Int]
-        print $ solve cumSum (l, r)
-        
+    mapM_ (print . solve cumSum) lrs
