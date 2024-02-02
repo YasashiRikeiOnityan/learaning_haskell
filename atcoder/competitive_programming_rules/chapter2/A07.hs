@@ -1,3 +1,5 @@
+module A07 where
+
 import Control.Monad ( replicateM )
 import Data.Array ( accumArray, elems, Array )
 
@@ -10,8 +12,8 @@ cumulativeSum xs = scanl (+) 0 $ elems xs
 
 main :: IO ()
 main = do
-    d <- readLn :: IO Int
-    n <- readLn :: IO Int
-    lrs <- concatMap (add2PreviousDay . fmap read . words) <$> replicateM n getLine :: IO [(Int, Int)]
+    d <- readLn
+    n <- readLn
+    lrs <- concatMap (add2PreviousDay . fmap read . words) <$> replicateM n getLine
     let accArray = accumArray (+) 0 (1, d + 1) lrs
     mapM_ print $ tail $ init $ cumulativeSum accArray

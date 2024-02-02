@@ -1,22 +1,5 @@
-{-
-import Control.Monad ( replicateM_ )
-
-cumulativeSum :: [Int] -> [Int]
-cumulativeSum = scanl (+) 0
-
-solve :: [Int] -> [Int] -> Int
-solve s [l, r] = (s !! r) - (s !! (l - 1))
-
-main :: IO ()
-main = do
-    [_, q] <- map read . words <$> getLine :: IO [Int]
-    as <- map read . words <$> getLine :: IO [Int]
-    let cumSum = cumulativeSum as
-    replicateM_ q $ do
-        lr <- map read . words <$> getLine :: IO [Int]
-        print $ solve cumSum lr
--}
-
+module A06 where
+    
 import Control.Monad ( replicateM )
 import Data.Array ( Array, (!), listArray )
 
