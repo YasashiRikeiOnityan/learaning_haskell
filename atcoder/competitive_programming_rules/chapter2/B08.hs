@@ -2,32 +2,28 @@ module B08 where
 
 import Control.Monad ( replicateM )
 import Data.Array ( Array, (!), listArray, accumArray, elems, bounds )
-
-build :: ((a -> [a] -> [a]) -> [a] -> [a]) -> [a]
-build g = g (:) []
-
-chunksOf :: Int -> [e] -> [[e]]
-chunksOf i ls = map (take i) (build (splitter ls))
- where
-  splitter :: [e] -> ([e] -> a -> a) -> a -> a
-  splitter [] _ n = n
-  splitter l c n = l `c` splitter (drop i l) c n
-
-fromArrayCS :: Array (Int, Int) Int -> Array (Int, Int) Int
-fromArrayCS as = do
-  let rows = chunksOf w $ elems as
-      ss = scanl (zipWith (+)) (replicate (w + 1) 0) $ map (scanl (+) 0) rows
-  listArray (bounds as) (concat ss)
-  where
-    ((lh, lw), (uh, uw)) = bounds as
-    w = uw + 1 - lw
+import qualified Data.ByteString.Char8 as BS
+import Data.ByteString (ByteString)
+import Data.Maybe (fromJust)
+import Data.List.Split (chunksOf)
 
 
-twoDimensionalSum :: Int -> Int -> [[Int]] -> Array (Int, Int) Int
-twoDimensionalSum h w xs = listArray ((0, 0), (h, w))
+-- build :: ((a -> [a] -> [a]) -> [a] -> [a]) -> [a]
+-- build g = g (:) []
+-- 
+-- chunksOf :: Int -> [e] -> [[e]]
+-- chunksOf i ls = map (take i) (build (splitter ls))
+--     where splitter :: [e] -> ([e] -> a -> a) -> a -> a
+--           splitter [] _ n = n
+--           splitter l c n = l `c` splitter (drop i l) c n
+
+twoDimensionalSum :: Array (Int, Int) Int -> Array (Int, Int) Int
+twoDimensionalSum arr = listArray bounds_
                          $ concat
                          $ scanl1 (zipWith (+))
-                         $ map (scanl1 (+)) xs
+                         $ map (scanl1 (+)) lists
+    where bounds_ = bounds arr
+          lists = chunksOf (1 + (snd . snd) bounds_) $ elems arr
 
 arrayToLists :: Array (Int, Int) Int -> [[Int]]
 arrayToLists arr = [[arr ! (i, j) | j <- [0..jMax]] | i <- [0..iMax]]
@@ -42,25 +38,16 @@ solve twoDimSum = map (\(a, b, c, d) -> twoDimSum ! (a - 1, b - 1) + twoDimSum !
 main :: IO ()
 main = do
     n <- readLn
-    xys <- map ((\[x, y] -> ((x, y), 1)) . map read . words) <$> replicateM n getLine
+    xys <- map ((\[x, y] -> ((x, y), 1)) . map readInt . BS.words) <$> replicateM n BS.getLine
     q <- readLn
-    qs <- map ((\[a, b, c, d] -> (a, b, c, d)) . map read . words) <$> replicateM q getLine
-    -- let h = maximum $ map (\((x, _), _) -> x) xys
-    -- let w = maximum $ map (\((_, y), _) -> y) xys
-    -- mapM_ print $ solve (twoDimensionalSum h w $ arrayToLists $ accumArray (+) 0 ((0, 0), (h, w)) xys) qs
-    mapM_ print $ solve (fromArrayCS $ accumArray (+) 0 ((0, 0), (1500, 1500)) xys) qs
+    qs <- map ((\[a, b, c, d] -> (a, b, c, d)) . map readInt . BS.words) <$> replicateM q BS.getLine
+    let w = maximum $ map (\((x, _), _) -> x) xys
+    let h = maximum $ map (\((_, y), _) -> y) xys
+    let twoDimSUm = twoDimensionalSum $ accumArray (+) 0 ((0, 0), (w, h)) xys
+    mapM_ (BS.putStrLn . showInt) (solve twoDimSUm qs)
 
+readInt :: ByteString -> Int
+readInt = fst . fromJust . BS.readInt
 
-{-
-5
-1 3
-2 5
-3 4
-2 6
-3 3
-3
-1 3 3 6
-1 5 2 6
-1 3 3 5
-
--}
+showInt :: Int -> ByteString
+showInt = BS.pack . show
