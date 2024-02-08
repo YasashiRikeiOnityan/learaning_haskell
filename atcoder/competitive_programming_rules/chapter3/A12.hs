@@ -1,8 +1,17 @@
+module A12 where
+
+import qualified Data.ByteString.Char8 as BS
+import Data.ByteString ( ByteString )
+import Data.Maybe ( fromJust )
+
 main :: IO ()
 main = do
-    [_, k] <- map read . words <$> getLine :: IO [Int]
-    as <- map read . words <$> getLine :: IO [Int]
+    [_, k] <- map readInt . BS.words <$> BS.getLine
+    as <- map readInt . BS.words <$> BS.getLine
     print $ solve 0 0 k as
+    
+readInt :: ByteString -> Int
+readInt = fst . fromJust . BS.readInt
 
 -- k秒目の操作を行う．
 -- 現在の枚数(now)がプリントしたい枚数(n)を超えている場合は，
