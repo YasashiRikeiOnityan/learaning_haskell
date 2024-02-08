@@ -3,7 +3,7 @@ module B11 where
 import qualified Data.ByteString.Char8 as BS
 import Data.ByteString ( ByteString )
 import Data.Maybe ( fromJust )
-import Data.Array ( Array, listArray, (!), bounds )
+import Data.Array ( Array, listArray, (!) )
 import Data.List ( sort )
 import Control.Monad ( replicateM )
 
