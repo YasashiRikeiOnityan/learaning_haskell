@@ -1,4 +1,4 @@
-module Main where
+module ABC042A where
 
 import Data.List ( sort )
 
