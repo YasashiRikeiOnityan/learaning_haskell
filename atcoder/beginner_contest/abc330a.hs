@@ -1,8 +1,8 @@
 import qualified Data.ByteString.Char8 as BS
-import Data.Maybe
-import Control.Monad
-import Data.Char
-import Data.List
+import Data.Maybe ( fromJust )
+import Control.Monad ( replicateM )
+import Data.Char ( isSpace )
+import Data.List ( unfoldr )
 
 readInt :: IO Int
 readInt = fst . fromJust . BS.readInt <$> BS.getLine
