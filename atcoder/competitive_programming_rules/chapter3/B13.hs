@@ -5,32 +5,24 @@ import Data.ByteString ( ByteString )
 import Data.Maybe ( fromJust )
 import Data.Array ( Array, listArray, (!) )
 
-step :: Int -> Int -> (Int, Int, Int) -> Array Int Int -> Int -> (Int, Int, Int)
-step l r (start, price, sum_) arr k
-    | start <= r && price_ <= k = step l r (start + 1, price_, sum_) arr k
-    | otherwise = (start, price__, sum_ + start - l)
-    where
-        price_ = price + arr ! start
-        price__ = price_ - (arr ! l) - (arr ! start)
+step :: Int -> Int -> Int -> Array Int Int -> Int -> Int
+step l r start arr k
+    | start < r && arr ! (start + 1) - arr ! (l - 1) <= k = step l r (start + 1) arr k
+    | otherwise = start
 
-syakutori :: Int -> Int -> Int -> Array Int Int -> Int -> Int -> Int -> Int 
-syakutori l r start arr k price sum_
-    | l > r = sum_
-    | otherwise = syakutori (l + 1) r newStart arr k newPrice newSum
+syakutori :: Int -> Int -> Int -> Array Int Int -> Int ->Int
+syakutori l r start arr k 
+    | l == r = next - l + 1
+    | otherwise = (next - l + 1) + syakutori (l + 1) r next arr k
         where
-            (newStart, newPrice, newSum) = step l r (start, price, sum_) arr k
+            next = step l r start arr k
 
 main :: IO ()
 main = do
     [n, k] <- map readInt . BS.words <$> BS.getLine
     as <- map readInt . BS.words <$> BS.getLine
-    let left = 1
-        right = n
-        start = left
-        arr = listArray (left, right) as
-        price = 0
-        sum_ = 0
-    print $ syakutori left right start arr k price sum_
+    let arr = listArray (0, n) $ scanl (+) 0 as
+    print $ syakutori 1 n 0 arr k
 
 readInt :: ByteString -> Int
 readInt = fst . fromJust . BS.readInt
