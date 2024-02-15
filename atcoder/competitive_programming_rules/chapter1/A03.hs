@@ -1,6 +1,6 @@
 main :: IO ()
 main = do
-    [n, k] <- map read . words <$> getLine :: IO [Int]
+    [_, k] <- map read . words <$> getLine :: IO [Int]
     ps <- map read . words <$> getLine :: IO[Int]
     qs <- map read . words <$> getLine :: IO [Int]
     putStrLn $ if k `elem` ((+) <$> ps <*> qs) then "Yes" else "No"

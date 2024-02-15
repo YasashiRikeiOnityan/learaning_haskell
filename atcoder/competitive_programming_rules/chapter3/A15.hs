@@ -6,8 +6,12 @@ import Data.ByteString ( ByteString )
 import Data.Maybe ( fromJust )
 import Data.Array ( Array, listArray, (!) )
 
-erase :: [Int] -> [Int]
-erase xs = Set.toList $ Set.fromList xs
+erase :: [Int] -> (Int, [Int])
+erase xs = (length_, xs_)
+    where
+        set = Set.fromList xs
+        length_ = Set.size set
+        xs_ = Set.toList set
 
 binarySearch :: Int -> Int -> Array Int Int -> Int -> Int
 binarySearch l r arr x
@@ -21,8 +25,7 @@ main :: IO ()
 main = do
     _ <- getLine
     as <- map readInt . BS.words <$> BS.getLine
-    let as_ = erase as
-        len = length as_
+    let (len, as_) = erase as
         arr = listArray (1, len) as_
     putStrLn . unwords $ map (show . binarySearch 1 len arr) as
 
