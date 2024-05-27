@@ -14,4 +14,4 @@ main = do
     n <- readLn :: IO Int
     lrs <- concatMap (attendAndLeave . fmap read . words) <$> replicateM n getLine :: IO [(Int, Int)]
     let accArray = accumArray (+) 0 (0, t) lrs
-    mapM_ print $ tail $ init $ cumulativeSum accArray
+    mapM_ print . tail . init $ cumulativeSum accArray
