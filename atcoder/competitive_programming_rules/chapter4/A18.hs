@@ -10,7 +10,7 @@ mkMap (n, s) arr (x, y) list
     | x == 0 = mkMap (n, s) arr (0, 1) (True : replicate s False)
     | otherwise = mkMap (n, s) arr (0, pred y) (mkNewList arr y list)
         where
-            ne
+            mkNewList arr y list = []
 
 main :: IO ()
 main = do

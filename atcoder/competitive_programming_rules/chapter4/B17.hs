@@ -30,7 +30,7 @@ reconstruction n arr im (len, list)
         where
             x = (+) <$> IM.lookup (pred n) im <*> Just (abs (arr ! n - arr ! pred n))
             y = IM.lookup n im
-            n' = if x == y then pred n else pred $ pred n
+            n' = if x == y then pred n else (pred . pred) n
 
 main :: IO ()
 main = do
