@@ -5,14 +5,6 @@ import Data.ByteString ( ByteString )
 import Data.Maybe ( fromJust )
 import Data.Array ( Array, listArray, (!), bounds, elems, assocs )
 
-<<<<<<< HEAD
-mkMap :: (Int, Int) -> Array Int Int -> (Int, Int) -> [Bool] -> [Bool]
-mkMap (n, s) arr (x, y) list
-    | x == 0 = mkMap (n, s) arr (0, 1) (True : replicate s False)
-    | otherwise = mkMap (n, s) arr (0, pred y) (mkNewList arr y list)
-        where
-            mkNewList arr y list = []
-=======
 mkMap :: (Int, Int) -> Array Int Int -> (Int, Int) -> Array Int Bool -> Array Int Bool
 mkMap (n, s) arr (x, y) brr
     | x == 0 = mkMap (n, s) arr (0, 1) (listArray (0, s) (True : replicate s False))
@@ -31,7 +23,6 @@ f :: Int -> Int -> [Int] -> [Bool] -> [Bool]
 f i s ids bs
     | i == s = bs ++ if i `elem` ids then [True] else [False]
     | otherwise = f (succ i) s ids (bs ++ if i `elem` ids then [True] else [False]) 
->>>>>>> a38b23bb8559c0f59d7cb64796d54ceca42c6bbc
 
 main :: IO ()
 main = do
