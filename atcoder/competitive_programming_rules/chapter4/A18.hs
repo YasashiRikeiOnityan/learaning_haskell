@@ -2,7 +2,7 @@ module A18 where
 
 judge :: Int -> [Int] -> [Int] -> Bool
 judge _ [] _ = False
-judge s (a:as) bs = (s `elem` bs') || judge s as bs'
+judge s (a:as) bs = s `elem` bs' || judge s as bs'
     where bs' = partialMap a bs
           partialMap :: Int -> [Int] -> [Int]
           partialMap _ [] = []
@@ -18,3 +18,9 @@ main = do
     [_, s] <- map read . words <$> getLine
     as <- map read . words <$> getLine
     putStrLn $ a18 s as
+
+partialMap' :: Int -> Int -> [Int] -> [Int]
+partialMap' s _ [] = []
+partialMap' s x (y:ys)
+    | x + y > s = y : partialMap' s x ys
+    | otherwise = y : (x + y) : partialMap' s x ys
