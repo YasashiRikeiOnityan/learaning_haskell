@@ -12,18 +12,16 @@ judge s (a : as) bs = if fst checked == s then checked else judge s as bs'
         bs' = partialMap s a bs
         checked = check s bs'
 
-f :: Int -> [(Int, Int)] -> [(Int, [Int])] -> [(Int, [Int])]
-f _ [] bs = bs
-f s (a : as) bs = f s as bs'
-    where
-        bs' = partialMap s a bs
-
 partialMap :: Int -> (Int, Int) -> [(Int, [Int])] -> [(Int, [Int])]
 partialMap _ _ [] = []
-partialMap s x (y : ys)
-    | snd x + fst y > s = y : partialMap s x ys
+partialMap s x [y]
+    | snd x + fst y > s = [y]
+    | otherwise = [bimap (snd x +) (fst x :) y]
+partialMap s x (y : z : zs)
+    | snd x + fst y > s = y : partialMap s x (z : zs)
     | snd x + fst y == s = [(s, fst x : snd y)]
-    | otherwise = y : bimap (snd x +) (fst x :) y : partialMap s x ys
+    | snd x + fst y == fst z = partialMap s x (z : zs)
+    | otherwise = y : bimap (snd x +) (fst x :) y : partialMap s x (z : zs)
 
 check :: Int -> [(Int, [Int])] -> (Int, [Int])
 check _ [] = (-1, [])
@@ -37,9 +35,7 @@ b18 s as = if fst res == s then (show . length . snd $ res) ++ "\n" ++ (unwords 
 
 main :: IO ()
 main = do
-    [_, s] <- map readInt . BS.words <$> BS.getLine
-    as <- map readInt . BS.words <$> BS.getLine
+    [_, s] <- map read . words <$> getLine
+    as <- map read . words <$> getLine
     putStrLn $ b18 s (zip [1..] as)
 
-readInt :: ByteString -> Int
-readInt = fst . fromJust . BS.readInt
