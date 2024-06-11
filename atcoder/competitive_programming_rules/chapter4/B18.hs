@@ -1,22 +1,16 @@
 module B18 where
 
-import qualified Data.ByteString.Char8 as BS
-import Data.ByteString ( ByteString )
-import Data.Maybe ( fromJust )
 import Data.Bifunctor ( bimap )
 
-judge :: Int -> [(Int, Int)] -> [(Int, [Int])] -> (Int, [Int])
-judge _ [] _ = (-1, [])
-judge s (a : as) bs = if fst checked == s then checked else judge s as bs'
-    where
-        bs' = partialMap s a bs
-        checked = check s bs'
+judge :: Int -> [(Int, Int)] -> [(Int, [Int])] -> [(Int, [Int])]
+judge _ [] bs = bs
+judge s (a : as) bs = judge s as (partialMap s a bs)
 
 partialMap :: Int -> (Int, Int) -> [(Int, [Int])] -> [(Int, [Int])]
 partialMap _ _ [] = []
 partialMap s x [y]
     | snd x + fst y > s = [y]
-    | otherwise = [bimap (snd x +) (fst x :) y]
+    | otherwise = y : [bimap (snd x +) (fst x :) y]
 partialMap s x (y : z : zs)
     | snd x + fst y > s = y : partialMap s x (z : zs)
     | snd x + fst y == s = [(s, fst x : snd y)]
@@ -31,11 +25,10 @@ check s (y : ys)
 
 b18 :: Int -> [(Int, Int)] -> String
 b18 s as = if fst res == s then (show . length . snd $ res) ++ "\n" ++ (unwords . map show . reverse $ snd res) else "-1"
-    where res = judge s as [(0, [])]
+    where res = check s $ judge s as [(0, [])]
 
 main :: IO ()
 main = do
     [_, s] <- map read . words <$> getLine
     as <- map read . words <$> getLine
     putStrLn $ b18 s (zip [1..] as)
-
