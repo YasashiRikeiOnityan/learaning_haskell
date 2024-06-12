@@ -9,13 +9,13 @@ judge s (a : as) bs = judge s as (partialMap s a bs)
 partialMap :: Int -> (Int, Int) -> [(Int, [Int])] -> [(Int, [Int])]
 partialMap _ _ [] = []
 partialMap s x [y]
-    | snd x + fst y > s = [y]
-    | otherwise = y : [bimap (snd x +) (fst x :) y]
+    | fst x + fst y > s = [y]
+    | otherwise = y : [bimap (fst x +) (snd x :) y]
 partialMap s x (y : z : zs)
-    | snd x + fst y > s = y : partialMap s x (z : zs)
-    | snd x + fst y == s = [(s, fst x : snd y)]
-    | snd x + fst y == fst z = partialMap s x (z : zs)
-    | otherwise = y : bimap (snd x +) (fst x :) y : partialMap s x (z : zs)
+    | fst x + fst y > s = y : partialMap s x (z : zs)
+    | fst x + fst y == s = [(s, snd x : snd y)]
+    | fst x + fst y == fst z = partialMap s x (z : zs)
+    | otherwise = y : bimap (fst x +) (snd x :) y : partialMap s x (z : zs)
 
 check :: Int -> [(Int, [Int])] -> (Int, [Int])
 check _ [] = (-1, [])
@@ -31,4 +31,4 @@ main :: IO ()
 main = do
     [_, s] <- map read . words <$> getLine
     as <- map read . words <$> getLine
-    putStrLn $ b18 s (zip [1..] as)
+    putStrLn $ b18 s (zip as [1..])
