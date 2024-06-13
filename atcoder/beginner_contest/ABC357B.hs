@@ -3,8 +3,8 @@ import Data.Char ( isUpper, isLower, toUpper, toLower )
 main :: IO ()
 main = do
     s <- getLine
-    let tmp = solve s ((0,[]), (0, []))
-    putStrLn $ if (fst . fst) tmp > (fst . snd) tmp then (snd . fst) tmp else (snd . snd) tmp
+    let ((x, s), (y, t)) = solve s ((0,[]), (0, []))
+    putStrLn $ if x > y then s else t
 
 solve :: String -> ((Int, String), (Int, String)) -> ((Int, String), (Int, String))
 solve [] p = p
